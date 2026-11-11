@@ -1,15 +1,77 @@
+
+import math
+
+
 def parse_booking(text):
-    service, minutes = text.split(':')
-    return service.strip().title(), float(minutes)
+    try:
+        if not isinstance(text, str):
+            return None
+
+        if text.count(':') != 1:
+            return None
+
+        service, minutes = text.split(':')
+        service = service.strip()
+        minutes = minutes.strip()
+
+        if not service or not minutes:
+            return None
+
+        duration = float(minutes)
+
+        if not math.isfinite(duration) or duration < 0:
+            return None
+
+        return service.title(), duration
+
+    except (ValueError, TypeError):
+        return None
+
 
 def duration_average(durations_csv):
-    values = [int(r) for r in durations_csv.split(',')]
-    return sum(values) // len(values)
+    try:
+        if not isinstance(durations_csv, str):
+            return None
+
+        if not durations_csv.strip():
+            return None
+
+        values = [int(r.strip()) for r in durations_csv.split(',')]
+
+        if not values or any(value < 0 for value in values):
+            return None
+
+        return sum(values) // len(values)
+
+    except (ValueError, TypeError):
+        return None
+
 
 def payable_bill(text):
-    bill, discount = text.split('|')
-    total = float(bill) * 1.18 - float(discount)
-    return max(total, 0)
+    try:
+        if not isinstance(text, str):
+            return None
+
+        if text.count('|') != 1:
+            return None
+
+        bill, discount = text.split('|')
+        bill = float(bill.strip())
+        discount = float(discount.strip())
+
+        if not math.isfinite(bill) or not math.isfinite(discount):
+            return None
+
+        if bill < 0 or discount < 0:
+            return None
+
+        total = bill * 1.18 - discount
+
+        return max(total, 0)
+
+    except (ValueError, TypeError):
+        return None
+
 
 def main():
     print("==== Running parse_booking ====")
@@ -26,6 +88,7 @@ def main():
     user_input = input("Enter bill|discount (e.g. 800|100): ")
     result = payable_bill(user_input)
     print("Payable Bill:", result)
+
 
 if __name__ == "__main__":
     main()
